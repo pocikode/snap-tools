@@ -4,8 +4,8 @@
     <aside class="h-screen w-80 bg-base-100">
       <div class="flex flex-col h-full">
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center space-x-3 px-8 py-3">
-          <h1 class="text-2xl text-blue-400 font-bold">SNAP TOOLS</h1>
+        <NuxtLink to="/" class="flex items-center space-x-3 px-8 py-3 text-3xl font-bold">
+          <h1 class="text-blue-400">SNAP TOOLS</h1>
         </NuxtLink>
 
         <!-- Main Menu -->

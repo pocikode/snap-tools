@@ -8,8 +8,13 @@
         </svg>
       </label>
     </div>
-    <div class="flex-1 flex justify-center">
-      <h1>Center</h1>
+    <div class="flex-1 flex justify-center join">
+      <select class="select">
+        <option>Crimson</option>
+        <option>Amber</option>
+        <option>Velvet</option>
+      </select>
+      <button type="button" class="btn btn-soft btn-secondary">Add Config</button>
     </div>
     <div class="flex justify-center items-center">
       <!-- Theme Controller -->
