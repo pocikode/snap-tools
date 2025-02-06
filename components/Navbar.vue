@@ -1,7 +1,19 @@
+<script lang="ts" setup>
+import { appConfigDir } from '@tauri-apps/api/path';
+const appDataDirPath = async () => {
+  const appDataDir = await appConfigDir();
+  console.log(appDataDir);
+};
+
+appDataDirPath();
+
+defineEmits(['open-config-modal']);
+</script>
+
 <template>
   <div class="navbar justify-between sticky top-0 z-20 bg-base-100 shadow w-full">
     <div class="">
-      <label for="left-sidebar-drawer" class="btn btn-primary drawer-button lg:hidden">
+      <label for="left-sidebar-drawer" class="btn btn-primary drawer-button md:hidden">
         <svg class="w-5 h-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
           stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -14,7 +26,24 @@
         <option>Amber</option>
         <option>Velvet</option>
       </select>
-      <button type="button" class="btn btn-soft btn-secondary">Add Config</button>
+      <div class="tooltip tooltip-bottom" data-tip="Add Config">
+        <button type="button" class="btn btn-soft btn-secondary" @click="$emit('open-config-modal')">
+          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M5 12h14m-7 7V5" />
+          </svg>
+        </button>
+      </div>
+      <div class="tooltip tooltip-bottom" data-tip="Edit Config">
+        <button type="button" class="btn btn-soft btn-info" @click="$emit('open-config-modal')">
+          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="flex justify-center items-center">
       <!-- Theme Controller -->
