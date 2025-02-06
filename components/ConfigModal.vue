@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-defineEmits(['close']);
+const emit = defineEmits(['close', 'update-config']);
 
 const name = ref('');
 const merchantId = ref('');
@@ -25,9 +25,20 @@ const validate = () => {
   return !Object.values(errors.value).some(error => error);
 };
 
-const saveConfig = () => {
+const saveConfig = async () => {
   if (validate()) {
-    // Save logic here
+    const config: SnapConfig = {
+      id: uid(),
+      name: name.value,
+      merchantID: merchantId.value,
+      secretKey: secretKey.value,
+      privateKey: privateKey.value,
+      baseURL: baseUrl.value
+    };
+
+    await addSnapConfig(config).then(() => {
+      emit('update-config');
+    });
   }
 };
 </script>
@@ -39,29 +50,29 @@ const saveConfig = () => {
       <h3 class="font-bold text-lg">Add Config</h3>
       <div class="flex flex-col">
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Config Name</legend>
+          <legend class="fieldset-legend w-full">Config Name</legend>
           <input type="text" class="input w-full" placeholder="Merchant Test 1" v-model="name" />
           <span class="fieldset-label text-error">{{ errors.name }}</span>
         </fieldset>
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Merchant ID</legend>
+          <legend class="fieldset-legend w-full">Merchant ID</legend>
           <input type="text" class="input w-full" placeholder="xxx" v-model="merchantId" />
           <span class="fieldset-label text-error">{{ errors.merchantId }}</span>
         </fieldset>
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Secret Key</legend>
+          <legend class="fieldset-legend w-full">Secret Key</legend>
           <input type="text" class="input w-full" placeholder="rAnd0mStr1n6" v-model="secretKey" />
           <span class="fieldset-label text-error">{{ errors.secretKey }}</span>
         </fieldset>
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Private Key</legend>
+          <legend class="fieldset-legend w-full">Private Key</legend>
           <textarea class="textarea h-24 w-full"
             placeholder="-----BEGIN PRIVATE KEY-----&#10;YouRPrivAt3Key....&#10;-----END PRIVATE KEY-----"
             v-model="privateKey"></textarea>
           <span class="fieldset-label text-error">{{ errors.privateKey }}</span>
         </fieldset>
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Base URL</legend>
+          <legend class="fieldset-legend w-full">Base URL</legend>
           <input type="text" class="input w-full" placeholder="https://google.com" v-model="baseUrl" />
           <span class="fieldset-label text-error">{{ errors.baseUrl }}</span>
         </fieldset>

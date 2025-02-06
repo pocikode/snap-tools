@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import { appConfigDir } from '@tauri-apps/api/path';
-const appDataDirPath = async () => {
-  const appDataDir = await appConfigDir();
-  console.log(appDataDir);
-};
-
-appDataDirPath();
+import type { SnapConfig } from "~/utils/config";
 
 defineEmits(['open-config-modal']);
+
+const props = defineProps<{
+  list_config: SnapConfig[];
+}>();
 </script>
 
 <template>
@@ -22,9 +20,10 @@ defineEmits(['open-config-modal']);
     </div>
     <div class="flex-1 flex justify-center join">
       <select class="select">
-        <option>Crimson</option>
-        <option>Amber</option>
-        <option>Velvet</option>
+        <option value="" disabled>Select Config</option>
+        <option v-for="config in props.list_config" :key="config.id" :value="config.id">
+          {{ config.name }}
+        </option>
       </select>
       <div class="tooltip tooltip-bottom" data-tip="Add Config">
         <button type="button" class="btn btn-soft btn-secondary" @click="$emit('open-config-modal')">

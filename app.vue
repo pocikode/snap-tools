@@ -1,5 +1,13 @@
 <script lang="ts" setup>
+import type { Config } from "./utils/config";
+
 const isConfigModalOpen = ref(false);
+const appConfig = ref<Config>(await loadConfig());
+
+const onUpdateConfig = async () => {
+  appConfig.value = await loadConfig();
+  isConfigModalOpen.value = false;
+};
 </script>
 
 <template>
@@ -7,9 +15,9 @@ const isConfigModalOpen = ref(false);
     <NuxtLayout>
       <input id="left-sidebar-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
-        <Navbar @open-config-modal="isConfigModalOpen = true" />
+        <Navbar :list_config="appConfig.snap" @open-config-modal="isConfigModalOpen = true" />
         <template v-if="isConfigModalOpen">
-          <ConfigModal @close="isConfigModalOpen = false" />
+          <ConfigModal @close="isConfigModalOpen = false" @update-config="onUpdateConfig" />
         </template>
 
         <!-- Main Content -->
