@@ -4,6 +4,7 @@ import {
 	readTextFile,
 	writeTextFile,
 } from "@tauri-apps/plugin-fs";
+import store from "./store";
 
 const CONFIG_FILE = "config.json";
 
@@ -46,4 +47,17 @@ export const addSnapConfig = async (snapConfig: SnapConfig): Promise<void> => {
 	const config = await loadConfig();
 	config.snap.push(snapConfig);
 	await saveConfig(config);
+	store.refreshConfig();
+};
+
+export const updateSnapConfig = async (
+	snapConfig: SnapConfig,
+): Promise<void> => {
+	const config = await loadConfig();
+	const index = config.snap.findIndex((config) => config.id === snapConfig.id);
+	if (index !== -1) {
+		config.snap[index] = snapConfig;
+		await saveConfig(config);
+		store.refreshConfig();
+	}
 };

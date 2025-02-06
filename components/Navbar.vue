@@ -1,11 +1,13 @@
 <script lang="ts" setup>
-import type { SnapConfig } from "~/utils/config";
+import store from '~/utils/store';
 
-defineEmits(['open-config-modal']);
-
-const props = defineProps<{
-  list_config: SnapConfig[];
+const emit = defineEmits<{
+  openConfigModal: [isCreate: boolean];
 }>();
+
+const handleModal = (isCreate: boolean) => {
+  emit('openConfigModal', isCreate);
+};
 </script>
 
 <template>
@@ -19,14 +21,14 @@ const props = defineProps<{
       </label>
     </div>
     <div class="flex-1 flex justify-center join">
-      <select class="select">
+      <select class="select" v-model="store.selectedConfigId" @change="store.updateSelectedConfig">
         <option value="" disabled>Select Config</option>
-        <option v-for="config in props.list_config" :key="config.id" :value="config.id">
+        <option v-for="config in store.config.snap" :key="config.id" :value="config.id">
           {{ config.name }}
         </option>
       </select>
       <div class="tooltip tooltip-bottom" data-tip="Add Config">
-        <button type="button" class="btn btn-soft btn-secondary" @click="$emit('open-config-modal')">
+        <button type="button" class="btn btn-soft btn-secondary" @click="$emit('openConfigModal', true)">
           <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
             viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -35,7 +37,7 @@ const props = defineProps<{
         </button>
       </div>
       <div class="tooltip tooltip-bottom" data-tip="Edit Config">
-        <button type="button" class="btn btn-soft btn-info" @click="$emit('open-config-modal')">
+        <button type="button" class="btn btn-soft btn-info" @click="$emit('openConfigModal', false)">
           <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
             viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

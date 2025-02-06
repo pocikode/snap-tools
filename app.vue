@@ -1,12 +1,10 @@
 <script lang="ts" setup>
-import type { Config } from "./utils/config";
-
 const isConfigModalOpen = ref(false);
-const appConfig = ref<Config>(await loadConfig());
+const isCreateConfig = ref(false);
 
-const onUpdateConfig = async () => {
-  appConfig.value = await loadConfig();
-  isConfigModalOpen.value = false;
+const openConfigModal = (isCreate: boolean) => {
+  isConfigModalOpen.value = true;
+  isCreateConfig.value = isCreate;
 };
 </script>
 
@@ -15,9 +13,9 @@ const onUpdateConfig = async () => {
     <NuxtLayout>
       <input id="left-sidebar-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
-        <Navbar :list_config="appConfig.snap" @open-config-modal="isConfigModalOpen = true" />
+        <Navbar @open-config-modal="openConfigModal" />
         <template v-if="isConfigModalOpen">
-          <ConfigModal @close="isConfigModalOpen = false" @update-config="onUpdateConfig" />
+          <ConfigModal @close="isConfigModalOpen = false" :is-create="isCreateConfig" />
         </template>
 
         <!-- Main Content -->
