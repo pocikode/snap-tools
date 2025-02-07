@@ -20,7 +20,7 @@ const openConfigModal = (isCreate: boolean) => {
 
         <!-- Main Content -->
         <main class="flex-1 h-screen overflow-y-auto md:py-4 py-4 px-6 bg-base-200">
-          <div class="min-h-[calc(100vh-250px)]">
+          <div class="min-h-[calc(100vh-250px)] text-sm">
             <NuxtPage />
           </div>
         </main>
