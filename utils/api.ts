@@ -5,6 +5,7 @@ import { rsaSign, symmetricSign } from "./crypt";
 import { getTimestamp } from "./helpers";
 
 export const ACCESS_TOKEN_B2B_PATH = "/openapi/v1.0/access-token/b2b";
+export const ACCESS_TOKEN_B2B2C_PATH = "/openapi/v1.0/access-token/b2b2c";
 export const QR_MPM_GENERATE_PATH = "/openapi/v1.0/qr/qr-mpm-generate";
 
 interface SnapErrorResponse {
@@ -18,6 +19,22 @@ interface AccessTokenB2BResponse {
 	accessToken: string;
 	tokenType: string;
 	expiresIn: number;
+}
+
+interface AccessTokenB2B2CRequest {
+	grantType: string;
+	authCode?: string;
+	refreshToken?: string;
+	additionalInfo: object;
+}
+
+interface AccessTokenB2B2CResponse {
+	responseCode: string;
+	responseMessage: string;
+	accessToken: string;
+	tokenType: string;
+	expiresIn: number;
+	refreshToken: string;
 }
 
 interface QrMpmAmount {
@@ -87,6 +104,54 @@ export const fetchAccessTokenB2B = async (
 	} catch (error: unknown) {
 		console.log(error);
 		throw new Error(`Failed to get access token B2B: ${error}`);
+	}
+};
+
+export const fetchAccessTokenB2B2C = async (
+	merchantId: string,
+	privateKeyPem: string,
+	authCheckData: string,
+	baseUrl: string,
+	isAuthCode = false,
+) => {
+	try {
+		const timestamp = getTimestamp();
+		const signature = rsaSign(merchantId, timestamp, privateKeyPem);
+
+		const payload: AccessTokenB2B2CRequest = {
+			grantType: isAuthCode ? "AUTHORIZATION_CODE" : "REFRESH_TOKEN",
+			additionalInfo: {},
+		};
+
+		if (isAuthCode) {
+			payload.authCode = authCheckData;
+		} else {
+			payload.refreshToken = authCheckData;
+		}
+
+		const response = await fetch(`${baseUrl}${ACCESS_TOKEN_B2B2C_PATH}`, {
+			method: "POST",
+			headers: {
+				"X-CLIENT-KEY": merchantId,
+				"X-TIMESTAMP": timestamp,
+				"X-SIGNATURE": signature,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+		});
+
+		if (!response.ok) {
+			const errorData: SnapErrorResponse = await response.json();
+			throw new Error(
+				`Failed to get access token B2B2C: ${errorData.responseMessage || "An unknown error occurred"}`,
+			);
+		}
+
+		const data: AccessTokenB2B2CResponse = await response.json();
+		return data;
+	} catch (error: unknown) {
+		console.log(error);
+		throw new Error(`Failed to get access token B2B2C: ${error}`);
 	}
 };
 
