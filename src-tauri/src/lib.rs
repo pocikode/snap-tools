@@ -11,6 +11,7 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .setup(setup_handler)
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())

@@ -46,7 +46,7 @@ const handleModal = (isCreate: boolean) => {
         </button>
       </div>
     </div>
-    <div class="flex justify-center items-center">
+    <div class="flex justify-center items-center px-3">
       <!-- Theme Controller -->
       <label class="swap swap-rotate">
         <input type="checkbox" class="theme-controller" value="light" />

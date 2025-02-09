@@ -1,3 +1,5 @@
+import { HmacSHA512 } from "crypto-js";
+import Base64 from "crypto-js/enc-base64";
 import { KJUR } from "jsrsasign";
 
 export function rsaSign(
@@ -22,4 +24,9 @@ export const hexToBase64 = (hex: string) => {
 	}
 
 	return btoa(binary);
+};
+
+export const symmetricSign = (data: string, key: string) => {
+	const hash = HmacSHA512(data, key);
+	return Base64.stringify(hash);
 };
