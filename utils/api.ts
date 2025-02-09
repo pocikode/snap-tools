@@ -1,8 +1,11 @@
 import { fetch } from "@tauri-apps/plugin-http";
-import { rsaSign } from "./crypt";
+import { SHA256 } from "crypto-js";
+import { v4 as uuidv4 } from "uuid";
+import { rsaSign, symmetricSign } from "./crypt";
 import { getTimestamp } from "./helpers";
 
 export const ACCESS_TOKEN_B2B_PATH = "/openapi/v1.0/access-token/b2b";
+export const QR_MPM_GENERATE_PATH = "/openapi/v1.0/qr/qr-mpm-generate";
 
 interface SnapErrorResponse {
 	responseCode: string;
@@ -15,6 +18,39 @@ interface AccessTokenB2BResponse {
 	accessToken: string;
 	tokenType: string;
 	expiresIn: number;
+}
+
+interface QrMpmAmount {
+	currency: string;
+	value: string;
+}
+
+interface QrMpmUrlParam {
+	url: string;
+	type: string;
+	isDeeplink: string;
+}
+
+interface QrMpmAdditional {
+	additionalLabel: string;
+	requestQrUrl: string;
+	requestQrImage: string;
+	urlParam: QrMpmUrlParam[];
+}
+
+interface QrMPMGenerateRequest {
+	partnerReferenceNo: string;
+	terminalId: string;
+	validityPeriod?: string;
+	amount?: QrMpmAmount;
+	additionalInfo: QrMpmAdditional;
+}
+
+interface QrMPMGenerateResponse {
+	responseCode: string;
+	responseMessage: string;
+	partnerReferenceNo: string;
+	qrContent: string;
 }
 
 export const fetchAccessTokenB2B = async (
@@ -51,5 +87,77 @@ export const fetchAccessTokenB2B = async (
 	} catch (error: unknown) {
 		console.log(error);
 		throw new Error(`Failed to get access token B2B: ${error}`);
+	}
+};
+
+export const fetchQrMPMGenerate = async (
+	merchantId: string,
+	accessToken: string,
+	referenceNo: string,
+	callbackUrl: string,
+	baseUrl: string,
+	secretKey: string,
+	amount: number | null = null,
+) => {
+	try {
+		const timestamp = getTimestamp();
+		const payload: QrMPMGenerateRequest = {
+			partnerReferenceNo: referenceNo,
+			terminalId: "Info Terminal",
+			additionalInfo: {
+				additionalLabel: "Additional Label",
+				requestQrUrl: "N",
+				requestQrImage: "N",
+				urlParam: [
+					{
+						url: callbackUrl,
+						type: "PAY_NOTIFY",
+						isDeeplink: "N",
+					},
+				],
+			},
+		};
+
+		if (amount && amount > 0) {
+			payload.amount = {
+				currency: "IDR",
+				value: amount.toFixed(2),
+			};
+
+			const validity = new Date();
+			validity.setDate(validity.getDate() + 2);
+			payload.validityPeriod = toIsoString(validity);
+		}
+
+		const payloadHash = SHA256(JSON.stringify(payload)).toString();
+		const stringToSign = `POST:${QR_MPM_GENERATE_PATH}:${accessToken}:${payloadHash}:${timestamp}`;
+		const signature = symmetricSign(stringToSign, secretKey);
+
+		const response = await fetch(`${baseUrl}${QR_MPM_GENERATE_PATH}`, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"X-PARTNER-ID": merchantId,
+				"X-TIMESTAMP": timestamp,
+				"X-SIGNATURE": signature,
+				"X-EXTERNAL-ID": uuidv4(),
+				"CHANNEL-ID": "QRIS",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload),
+		});
+
+		if (!response.ok) {
+			const errorData: SnapErrorResponse = await response.json();
+			throw new Error(
+				`Failed to generate QR MPM: ${errorData.responseMessage || "An unknown error occurred"}`,
+			);
+		}
+
+		const data: QrMPMGenerateResponse = await response.json();
+		return data.qrContent;
+	} catch (error: unknown) {
+		console.log(error);
+		throw new Error(`Failed to generate QR MPM: ${error}`);
 	}
 };
