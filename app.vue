@@ -14,6 +14,9 @@ const openConfigModal = (isCreate: boolean) => {
       <input id="left-sidebar-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
         <Navbar @open-config-modal="openConfigModal" />
+        <template v-if="store.showError">
+          <ErrorModal />
+        </template>
         <template v-if="isConfigModalOpen">
           <ConfigModal @close="isConfigModalOpen = false" :is-create="isCreateConfig" />
         </template>

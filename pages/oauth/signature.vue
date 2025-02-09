@@ -1,5 +1,30 @@
 <script lang="ts" setup>
+import { rsaSign } from '~/utils/crypt';
+import { toIsoString } from '~/utils/helpers';
+import store from '~/utils/store';
+
 const isTimestampAuto = ref(true);
+const showResult = ref(false);
+const timestamp = ref('');
+const signature = ref('');
+
+const generateSignature = () => {
+  if (isTimestampAuto.value) {
+    const date = new Date();
+    timestamp.value = toIsoString(date);
+  }
+
+  if (store.selectedConfig) {
+    try {
+      signature.value = rsaSign(store.selectedConfig.merchantID, timestamp.value, store.selectedConfig.privateKey);
+      showResult.value = true;
+    } catch (error: unknown) {
+      console.log(error);
+      store.showErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+      showResult.value = false;
+    }
+  }
+};
 </script>
 
 <template>
@@ -22,10 +47,28 @@ const isTimestampAuto = ref(true);
     <Transition name="fade">
       <label class="floating-label" v-if="!isTimestampAuto">
         <span>Timestamp</span>
-        <input type="text" placeholder="2025-01-31 00:00:00+07" class="input input-md" />
+        <input type="text" class="input input-md" v-model="timestamp" placeholder="2025-01-31 00:00:00+07" />
       </label>
     </Transition>
 
-    <button type="button" class="btn btn-primary">Generate</button>
+    <button type="button" class="btn btn-primary" @click="generateSignature">Generate</button>
+
+    <Transition name="fade">
+      <fieldset class="fieldset w-full bg-base-200 border border-base-300 p-4 rounded-box" v-if="showResult">
+        <legend class="fieldset-legend">Result</legend>
+
+        <label class="fieldset-label">Timestamp</label>
+        <div class="join">
+          <BtnCopy :data="timestamp" />
+          <input type="text" class="input w-full" v-model="timestamp" placeholder="Timestamp" />
+        </div>
+
+        <label class="fieldset-label mt-3">Signature</label>
+        <div class="join">
+          <BtnCopy :data="signature" />
+          <input type="text" class="input w-full" v-model="signature" placeholder="Signature" />
+        </div>
+      </fieldset>
+    </Transition>
   </div>
 </template>
