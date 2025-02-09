@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { rsaSign } from '~/utils/crypt';
-import { toIsoString } from '~/utils/helpers';
+import { getTimestamp } from '~/utils/helpers';
 import store from '~/utils/store';
 
 const isTimestampAuto = ref(true);
@@ -10,8 +10,7 @@ const signature = ref('');
 
 const generateSignature = () => {
   if (isTimestampAuto.value) {
-    const date = new Date();
-    timestamp.value = toIsoString(date);
+    timestamp.value = getTimestamp();
   }
 
   if (!store.selectedConfig) {
