@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { load } from "@tauri-apps/plugin-store";
+import QRCode from "qrcode";
 import { v4 as uuidv4 } from "uuid";
 import { fetchAccessTokenB2B, fetchQrMPMGenerate } from "~/utils/api";
 import store from "~/utils/store";
@@ -20,6 +21,7 @@ const isDynamic = ref(false);
 const amount = ref(0);
 const callbackUrl = ref("");
 const qrContent = ref("");
+const qrContentUrl = ref("");
 
 onMounted(async () => {
   const existingConfig = await qrConfig.get<QrConfig>("qr_payload");
@@ -78,6 +80,12 @@ const generateQrMPM = async () => {
       amount: amount.value,
       callbackUrl: callbackUrl.value,
     });
+
+    await QRCode.toDataURL(result, { errorCorrectionLevel: "H" }).then(
+      (url: string) => {
+        qrContentUrl.value = url;
+      },
+    );
   } catch (error: unknown) {
     console.log(error);
     store.showErrorMessage(
@@ -144,6 +152,8 @@ const generateQrMPM = async () => {
           <BtnCopy :data="qrContent" />
           <input type="text" class="input w-full" v-model="qrContent" />
         </div>
+
+        <img :src="qrContentUrl" alt="QR MPM" class="mt-3 ">
       </fieldset>
     </Transition>
   </div>
