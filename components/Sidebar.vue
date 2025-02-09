@@ -63,6 +63,10 @@ import { NuxtLink } from '#components';
             </NuxtLink>
           </li>
         </ul>
+
+        <div class="p-4">
+          <p class="text-sm font-semibold">Credit: pocikode</p>
+        </div>
       </div>
     </aside>
   </div>
