@@ -14,15 +14,19 @@ const generateSignature = () => {
     timestamp.value = toIsoString(date);
   }
 
-  if (store.selectedConfig) {
-    try {
-      signature.value = rsaSign(store.selectedConfig.merchantID, timestamp.value, store.selectedConfig.privateKey);
-      showResult.value = true;
-    } catch (error: unknown) {
-      console.log(error);
-      store.showErrorMessage(error instanceof Error ? error.message : 'An error occurred');
-      showResult.value = false;
-    }
+  if (!store.selectedConfig) {
+    store.showErrorMessage('Please select a config first');
+    showResult.value = false;
+    return;
+  }
+
+  try {
+    signature.value = rsaSign(store.selectedConfig.merchantID, timestamp.value, store.selectedConfig.privateKey);
+    showResult.value = true;
+  } catch (error: unknown) {
+    console.log(error);
+    store.showErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+    showResult.value = false;
   }
 };
 </script>
